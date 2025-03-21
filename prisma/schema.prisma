@@ -1,0 +1,41 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(cuid()) @map("_id")
+  email     String  @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FraudulentApp {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  app_name    String
+  developer   String
+  category    String
+  risk_level  String
+  reported_on DateTime
+}
+
+model FraudulentUrl {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  url         String
+  risk_level  String
+  detected_on DateTime
+  category    String
+}
+
+model FraudTrend {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  date               DateTime
+  fraud_cases_detected Int
+}
