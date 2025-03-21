@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -34,39 +33,32 @@ export default function SignUp() {
     }
 
     try {
+      // Simple signup API call without NextAuth integration
       const response = await axios.post("/api/signup", {
         email,
         password,
         name: fullName,
       });
 
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Account created but couldn't sign in automatically. Please sign in manually.");
-      } else {
-        router.push("/dashboard");
-      }
+      // Store token in localStorage for future API calls
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      // Redirect to dashboard after successful signup
+      router.push("/dashboard");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        // Display the error message from the API response
         const errorMessage = err.response?.data?.message || 
                             err.response?.data?.error || 
                             "Failed to create account. Please try again.";
         setError(errorMessage);
         
-        // If you want to log additional details for debugging
         console.error("API Error Details:", {
           status: err.response?.status,
           statusText: err.response?.statusText,
           data: err.response?.data
         });
       } else {
-        // For non-axios errors
         setError("Something went wrong. Please try again.");
       }
     } finally {
@@ -289,7 +281,7 @@ export default function SignUp() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   type="button"
-                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  onClick={() => window.location.href = "/api/auth/google"}
                   className="flex items-center justify-center text-black py-3 px-4 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-all duration-150"
                 >
                   <svg
@@ -321,7 +313,7 @@ export default function SignUp() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   type="button"
-                  onClick={() => signIn("twitter", { callbackUrl: "/dashboard" })}
+                  onClick={() => window.location.href = "/api/auth/twitter"}
                   className="flex items-center justify-center py-3 px-4 bg-black text-white border border-black rounded-lg shadow-sm hover:bg-gray-900 transition-all duration-150"
                 >
                   <svg
